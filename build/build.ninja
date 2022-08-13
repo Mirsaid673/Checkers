@@ -77,15 +77,15 @@ build CMakeFiles/out.dir/src/main.cpp.o: CXX_COMPILER__out_Debug /home/appl/Proj
   OBJECT_DIR = CMakeFiles/out.dir
   OBJECT_FILE_DIR = CMakeFiles/out.dir/src
 
-build CMakeFiles/out.dir/src/mesh.cpp.o: CXX_COMPILER__out_Debug /home/appl/Projects/checkers/src/mesh.cpp || cmake_object_order_depends_target_out
-  DEP_FILE = CMakeFiles/out.dir/src/mesh.cpp.o.d
+build CMakeFiles/out.dir/src/mesh2D.cpp.o: CXX_COMPILER__out_Debug /home/appl/Projects/checkers/src/mesh2D.cpp || cmake_object_order_depends_target_out
+  DEP_FILE = CMakeFiles/out.dir/src/mesh2D.cpp.o.d
   FLAGS = -g -std=gnu++17
   INCLUDES = -I/home/appl/Projects/checkers/include -I/home/appl/Projects/checkers/resource/libs/stb_image
   OBJECT_DIR = CMakeFiles/out.dir
   OBJECT_FILE_DIR = CMakeFiles/out.dir/src
 
-build CMakeFiles/out.dir/src/mesh2D.cpp.o: CXX_COMPILER__out_Debug /home/appl/Projects/checkers/src/mesh2D.cpp || cmake_object_order_depends_target_out
-  DEP_FILE = CMakeFiles/out.dir/src/mesh2D.cpp.o.d
+build CMakeFiles/out.dir/src/model.cpp.o: CXX_COMPILER__out_Debug /home/appl/Projects/checkers/src/model.cpp || cmake_object_order_depends_target_out
+  DEP_FILE = CMakeFiles/out.dir/src/model.cpp.o.d
   FLAGS = -g -std=gnu++17
   INCLUDES = -I/home/appl/Projects/checkers/include -I/home/appl/Projects/checkers/resource/libs/stb_image
   OBJECT_DIR = CMakeFiles/out.dir
@@ -127,7 +127,7 @@ build CMakeFiles/out.dir/resource/libs/stb_image/stb_image.cpp.o: CXX_COMPILER__
 #############################################
 # Link the executable out
 
-build out: CXX_EXECUTABLE_LINKER__out_Debug CMakeFiles/out.dir/src/VAO.cpp.o CMakeFiles/out.dir/src/buffer.cpp.o CMakeFiles/out.dir/src/camera2D.cpp.o CMakeFiles/out.dir/src/main.cpp.o CMakeFiles/out.dir/src/mesh.cpp.o CMakeFiles/out.dir/src/mesh2D.cpp.o CMakeFiles/out.dir/src/shader.cpp.o CMakeFiles/out.dir/src/texture.cpp.o CMakeFiles/out.dir/src/window.cpp.o CMakeFiles/out.dir/resource/libs/stb_image/stb_image.cpp.o
+build out: CXX_EXECUTABLE_LINKER__out_Debug CMakeFiles/out.dir/src/VAO.cpp.o CMakeFiles/out.dir/src/buffer.cpp.o CMakeFiles/out.dir/src/camera2D.cpp.o CMakeFiles/out.dir/src/main.cpp.o CMakeFiles/out.dir/src/mesh2D.cpp.o CMakeFiles/out.dir/src/model.cpp.o CMakeFiles/out.dir/src/shader.cpp.o CMakeFiles/out.dir/src/texture.cpp.o CMakeFiles/out.dir/src/window.cpp.o CMakeFiles/out.dir/resource/libs/stb_image/stb_image.cpp.o
   FLAGS = -g
   LINK_LIBRARIES = -lGL  -lGLEW  -lglfw
   OBJECT_DIR = CMakeFiles/out.dir

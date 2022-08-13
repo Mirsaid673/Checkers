@@ -10,7 +10,7 @@ Mesh2D::Mesh2D(const std::vector<Vertex2D> &v, const std::vector<GLuint> &i) : v
 	ebo.set_data(GL_ELEMENT_ARRAY_BUFFER, indices.data(), indices.size() * sizeof(GLuint));
 
 	vao.linkAttrib(0, 2, sizeof(Vertex2D), (GLvoid *)offsetof(Vertex2D, position));
-	vao.linkAttrib(1, 3, sizeof(Vertex2D), (GLvoid *)offsetof(Vertex2D, color));
+	vao.linkAttrib(1, 2, sizeof(Vertex2D), (GLvoid *)offsetof(Vertex2D, uv));
 
 	vao.unbind();
 	vbo.unbind();

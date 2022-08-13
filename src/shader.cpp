@@ -147,7 +147,7 @@ void Shader::setVec2d(const char *name, double value1, double value2)
 
 void Shader::setVec2i(const char *name, int *values)
 {
-	glUniform1iv(glGetUniformLocation(ID, name), 2, values);
+	glUniform2iv(glGetUniformLocation(ID, name), 1, values);
 }
 
 void Shader::setVec2ui(const char *name, unsigned int *values)
@@ -155,19 +155,19 @@ void Shader::setVec2ui(const char *name, unsigned int *values)
 	glUniform1uiv(glGetUniformLocation(ID, name), 2, values);
 }
 
-void Shader::setVec2(const char *name, float *values)
+void Shader::setVec2(const char *name, const float *values)
 {
-	glUniform1fv(glGetUniformLocation(ID, name), 2, values);
+	glUniform2fv(glGetUniformLocation(ID, name), 1, values);
 }
 
 void Shader::setVec2(const char *name, const glm::vec2 &v)
 {
-	glUniform1fv(glGetUniformLocation(ID, name), 2, &v.x);
+	glUniform2fv(glGetUniformLocation(ID, name), 1, &v.x);
 }
 
 void Shader::setVec2d(const char *name, double *values)
 {
-	glUniform1dv(glGetUniformLocation(ID, name), 2, values);
+	glUniform2dv(glGetUniformLocation(ID, name), 1, values);
 }
 
 void Shader::setVec3i(const char *name, int value1, int value2, int value3)
@@ -186,7 +186,7 @@ void Shader::setVec3(const char *name, float value1, float value2, float value3)
 
 void Shader::setVec3(const char *name, const glm::vec3 &v)
 {
-	glUniform3fv(glGetUniformLocation(ID, name), 3, &v.x);
+	glUniform3fv(glGetUniformLocation(ID, name), 1, &v.x);
 }
 
 void Shader::setVec3d(const char *name, double value1, double value2, double value3)
@@ -196,22 +196,22 @@ void Shader::setVec3d(const char *name, double value1, double value2, double val
 
 void Shader::setVec3i(const char *name, int *values)
 {
-	glUniform1iv(glGetUniformLocation(ID, name), 3, values);
+	glUniform2iv(glGetUniformLocation(ID, name), 1, values);
 }
 
 void Shader::setVec3ui(const char *name, unsigned int *values)
 {
-	glUniform1uiv(glGetUniformLocation(ID, name), 3, values);
+	glUniform3uiv(glGetUniformLocation(ID, name), 1, values);
 }
 
 void Shader::setVec3(const char *name, float *values)
 {
-	glUniform1fv(glGetUniformLocation(ID, name), 3, values);
+	glUniform3fv(glGetUniformLocation(ID, name), 1, values);
 }
 
 void Shader::setVec3d(const char *name, double *values)
 {
-	glUniform1dv(glGetUniformLocation(ID, name), 3, values);
+	glUniform3dv(glGetUniformLocation(ID, name), 1, values);
 }
 
 void Shader::setMat3(const char *name, float *m)

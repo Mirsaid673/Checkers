@@ -21,13 +21,13 @@
 },
 {
   "directory": "/home/appl/Projects/checkers/build",
-  "command": "/usr/bin/g++ -I/home/appl/Projects/checkers/include -I/home/appl/Projects/checkers/resource/libs/stb_image -g -std=gnu++17 -o CMakeFiles/out.dir/src/mesh.cpp.o -c /home/appl/Projects/checkers/src/mesh.cpp",
-  "file": "/home/appl/Projects/checkers/src/mesh.cpp"
+  "command": "/usr/bin/g++ -I/home/appl/Projects/checkers/include -I/home/appl/Projects/checkers/resource/libs/stb_image -g -std=gnu++17 -o CMakeFiles/out.dir/src/mesh2D.cpp.o -c /home/appl/Projects/checkers/src/mesh2D.cpp",
+  "file": "/home/appl/Projects/checkers/src/mesh2D.cpp"
 },
 {
   "directory": "/home/appl/Projects/checkers/build",
-  "command": "/usr/bin/g++ -I/home/appl/Projects/checkers/include -I/home/appl/Projects/checkers/resource/libs/stb_image -g -std=gnu++17 -o CMakeFiles/out.dir/src/mesh2D.cpp.o -c /home/appl/Projects/checkers/src/mesh2D.cpp",
-  "file": "/home/appl/Projects/checkers/src/mesh2D.cpp"
+  "command": "/usr/bin/g++ -I/home/appl/Projects/checkers/include -I/home/appl/Projects/checkers/resource/libs/stb_image -g -std=gnu++17 -o CMakeFiles/out.dir/src/model.cpp.o -c /home/appl/Projects/checkers/src/model.cpp",
+  "file": "/home/appl/Projects/checkers/src/model.cpp"
 },
 {
   "directory": "/home/appl/Projects/checkers/build",

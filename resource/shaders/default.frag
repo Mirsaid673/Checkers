@@ -1,9 +1,9 @@
 #version 330 core
 
-//in vec3 color;
-in vec3 color;
+in vec2 uv;
+uniform sampler2D tex;
 
 out vec4 Frag;
 void main(){
-  Frag = vec4(color, 1);
+  Frag = texture(tex, uv);
 }

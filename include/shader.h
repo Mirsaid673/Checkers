@@ -34,7 +34,7 @@ public:
 
 	void setVec2i(const char *name, int *values);
 	void setVec2ui(const char *name, unsigned int *values);
-	void setVec2(const char *name, float *values);
+	void setVec2(const char *name, const float *values);
 	void setVec2(const char *name, const glm::vec2 &v);
 	void setVec2d(const char *name, double *values);
 
