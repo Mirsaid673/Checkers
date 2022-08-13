@@ -13,14 +13,17 @@ const int desk_size = 8;
 int desk[desk_size][desk_size] =
     {
         // inversed to better access
-        {1, 0, 1, 0, 1, 0, 1, 0},
-        {0, 1, 0, 1, 0, 1, 0, 1},
-        {1, 0, 1, 0, 1, 0, 1, 0},
-        {0, 0, 0, 0, 0, 0, 0, 0},
-        {0, 0, 0, 0, 0, 0, 0, 0},
+        // 0 - white checker
+        // 1 - black checker
+        // 2 - empty cell
         {0, 2, 0, 2, 0, 2, 0, 2},
         {2, 0, 2, 0, 2, 0, 2, 0},
         {0, 2, 0, 2, 0, 2, 0, 2},
+        {2, 2, 2, 2, 2, 2, 2, 2},
+        {2, 2, 2, 2, 2, 2, 2, 2},
+        {2, 1, 2, 1, 2, 1, 2, 1},
+        {1, 2, 1, 2, 1, 2, 1, 2},
+        {2, 1, 2, 1, 2, 1, 2, 1},
 };
 
 Window wnd;
@@ -64,8 +67,8 @@ int main()
     Model black_model(checker_mesh, black_texture, shader);
 
     Checker chekcers[2]{
-        Checker(black_model, Checker::Color::BLACK), // black one
         Checker(white_model, Checker::Color::WHITE), // white one
+        Checker(black_model, Checker::Color::BLACK), // black one
     };
 
     glm::ivec2 unclicked(8, 8);
@@ -74,6 +77,13 @@ int main()
 
     int last_button_state = GLFW_RELEASE;
     int current_button_state = GLFW_RELEASE;
+
+    Checker::Color whoose_move = Checker::Color::WHITE;
+    Checker::Color next_move[2]{
+        Checker::Color::BLACK,
+        Checker::Color::WHITE,
+    };
+
     while (wnd.getKey(GLFW_KEY_ESCAPE) != GLFW_PRESS && wnd.shouldClose() == 0)
     {
         glViewport(0, 0, wnd.getWidth(), wnd.getHeight());
@@ -84,26 +94,34 @@ int main()
         last_button_state = current_button_state;
         current_button_state = wnd.getMouseButton(GLFW_MOUSE_BUTTON_LEFT);
 
-        if (last_button_state == GLFW_PRESS && current_button_state == GLFW_RELEASE)
+        if (last_button_state == GLFW_PRESS && current_button_state == GLFW_RELEASE)//if clicked
         {
-            std::cout<< "clicked" << std::endl;
+            static int count = 0;
+            std::cout << "clicked\t" << count << std::endl;
+            count++;
             glm::dvec2 cursor_pos;
             wnd.getCursorPos(&cursor_pos.x, &cursor_pos.y);
             glm::ivec2 n = desk_coord_from_screen_coord(cursor_pos);
             if (n.x < desk_size && n.x >= 0 && n.y < desk_size && n.y >= 0)
             {
-                if (desk[n.y][n.x] != 0) // if it is checker
-                    checker_clicked = n;
-                else // if it is empty cell
+                int desk_cell = desk[n.y][n.x];
+                if (desk_cell != Checker::Color::EMPTY) // if it is checker
+                {
+                    if (chekcers[desk_cell].getColor() == whoose_move)
+                        checker_clicked = n;
+                }
+                else if(checker_clicked != unclicked)// if it is alreaddy clicked some checker
                     cell_clicked = n;
             }
         }
 
         if (checker_clicked != unclicked && cell_clicked != unclicked)
         {
+            
             std::swap(desk[checker_clicked.y][checker_clicked.x], desk[cell_clicked.y][cell_clicked.x]);
             checker_clicked = unclicked;
             cell_clicked = unclicked;
+            whoose_move = next_move[whoose_move];
         }
 
         shader.use();
@@ -115,7 +133,7 @@ int main()
             for (int j = 0; j < desk_size; j++) // columns
             {
                 int curren_cell_type = desk[i][j];
-                if (curren_cell_type != 0)
+                if (curren_cell_type != Checker::Color::EMPTY)
                 {
                     Checker &current = chekcers[desk[i][j] % 2];
                     current.position = position_from_coord(i, j);
