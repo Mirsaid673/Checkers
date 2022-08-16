@@ -162,6 +162,7 @@ glm::vec2 position_from_coord(int i, int j)
     return glm::vec2(Checker::default_pos + glm::vec2(j, i));
 }
 
+
 glm::vec2 screen_normalized(glm::vec2 coord)
 {
     glm::vec2 window_size(wnd.getWidth(), wnd.getHeight());
