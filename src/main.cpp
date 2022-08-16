@@ -94,7 +94,7 @@ int main()
         last_button_state = current_button_state;
         current_button_state = wnd.getMouseButton(GLFW_MOUSE_BUTTON_LEFT);
 
-        if (last_button_state == GLFW_PRESS && current_button_state == GLFW_RELEASE)//if clicked
+        if (last_button_state == GLFW_PRESS && current_button_state == GLFW_RELEASE) // if clicked
         {
             static int count = 0;
             std::cout << "clicked\t" << count << std::endl;
@@ -110,14 +110,14 @@ int main()
                     if (chekcers[desk_cell].getColor() == whoose_move)
                         checker_clicked = n;
                 }
-                else if(checker_clicked != unclicked)// if it is alreaddy clicked some checker
+                else if (checker_clicked != unclicked) // if it is alreaddy clicked some checker
                     cell_clicked = n;
             }
         }
 
         if (checker_clicked != unclicked && cell_clicked != unclicked)
         {
-            
+
             std::swap(desk[checker_clicked.y][checker_clicked.x], desk[cell_clicked.y][cell_clicked.x]);
             checker_clicked = unclicked;
             cell_clicked = unclicked;
