@@ -8,6 +8,7 @@
 
 glm::vec2 position_from_coord(int i, int j);
 glm::ivec2 desk_coord_from_screen_coord(glm::vec2 coord);
+bool is_cell_black(int x, int y);
 
 const int desk_size = 8;
 int desk[desk_size][desk_size] =
@@ -83,6 +84,10 @@ int main()
         Checker::Color::BLACK,
         Checker::Color::WHITE,
     };
+    int move_direction[2]{
+        1,
+        -1,
+    };
 
     while (wnd.getKey(GLFW_KEY_ESCAPE) != GLFW_PRESS && wnd.shouldClose() == 0)
     {
@@ -115,13 +120,29 @@ int main()
             }
         }
 
-        if (checker_clicked != unclicked && cell_clicked != unclicked)
+        if (checker_clicked != unclicked && cell_clicked != unclicked) // checking if move is correct
         {
-
-            std::swap(desk[checker_clicked.y][checker_clicked.x], desk[cell_clicked.y][cell_clicked.x]);
-            checker_clicked = unclicked;
-            cell_clicked = unclicked;
-            whoose_move = next_move[whoose_move];
+            if (cell_clicked.y - checker_clicked.y == move_direction[whoose_move] && abs(cell_clicked.x - checker_clicked.x) == 1)
+            {
+                std::swap(desk[checker_clicked.y][checker_clicked.x], desk[cell_clicked.y][cell_clicked.x]);
+                checker_clicked = unclicked;
+                cell_clicked = unclicked;
+                whoose_move = next_move[whoose_move];
+            }
+            else if (cell_clicked.y - checker_clicked.y == (move_direction[whoose_move] * 2) &&
+                     abs(cell_clicked.x - checker_clicked.x) == 2 &&
+                     desk[(cell_clicked.y + checker_clicked.y) / 2][(cell_clicked.x + checker_clicked.x) / 2] == next_move[whoose_move])
+            {
+                desk[(cell_clicked.y + checker_clicked.y) / 2][(cell_clicked.x + checker_clicked.x) / 2] = Checker::Color::EMPTY;
+                std::swap(desk[checker_clicked.y][checker_clicked.x], desk[cell_clicked.y][cell_clicked.x]);
+                checker_clicked = unclicked;
+                cell_clicked = unclicked;
+                whoose_move = next_move[whoose_move];
+            }
+            else
+            {
+                cell_clicked = unclicked;
+            }
         }
 
         shader.use();
@@ -162,7 +183,6 @@ glm::vec2 position_from_coord(int i, int j)
     return glm::vec2(Checker::default_pos + glm::vec2(j, i));
 }
 
-
 glm::vec2 screen_normalized(glm::vec2 coord)
 {
     glm::vec2 window_size(wnd.getWidth(), wnd.getHeight());
@@ -178,4 +198,9 @@ glm::ivec2 desk_coord_from_screen_coord(glm::vec2 coord)
     glm::mat2 proj(camera.getProjection());
     glm::vec2 start_pos = (proj / normilized) + glm::vec2(4, 4); // left-bottom world coord;
     return glm::floor(start_pos);
+}
+
+bool is_cell_black(int x, int y)
+{
+    return (x + y) % 2 == 0;
 }
