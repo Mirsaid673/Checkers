@@ -7,8 +7,12 @@
 #include "checker.h"
 
 glm::vec2 position_from_coord(int i, int j);
-glm::ivec2 desk_coord_from_screen_coord(glm::vec2 coord);
-bool is_cell_black(int x, int y);
+glm::ivec2 desk_coord_from_screen_coord(const glm::ivec2 &coord);
+std::vector<glm::ivec2> get_avialable_moves_with_eating(glm::ivec2 pos);
+bool has_moves_with_getting(const glm::ivec2 &, const glm::ivec2 &dir);
+bool has_moves_with_getting(const glm::ivec2 &);
+int desk_cell(glm::ivec2 v);
+int get_color(int checker) { return checker & 1;}
 
 const int desk_size = 8;
 int desk[desk_size][desk_size] =
@@ -25,6 +29,12 @@ int desk[desk_size][desk_size] =
         {2, 1, 2, 1, 2, 1, 2, 1},
         {1, 2, 1, 2, 1, 2, 1, 2},
         {2, 1, 2, 1, 2, 1, 2, 1},
+};
+
+Checker::Color whoose_move = Checker::Color::WHITE;
+Checker::Color next_move[2]{
+    Checker::Color::BLACK,
+    Checker::Color::WHITE,
 };
 
 Window wnd;
@@ -67,7 +77,7 @@ int main()
     Model white_model(checker_mesh, white_texture, shader);
     Model black_model(checker_mesh, black_texture, shader);
 
-    Checker chekcers[2]{
+    Checker checkers[2]{
         Checker(white_model, Checker::Color::WHITE), // white one
         Checker(black_model, Checker::Color::BLACK), // black one
     };
@@ -79,16 +89,13 @@ int main()
     int last_button_state = GLFW_RELEASE;
     int current_button_state = GLFW_RELEASE;
 
-    Checker::Color whoose_move = Checker::Color::WHITE;
-    Checker::Color next_move[2]{
-        Checker::Color::BLACK,
-        Checker::Color::WHITE,
-    };
     int move_direction[2]{
         1,
         -1,
     };
 
+    bool is_continue = false;
+    ;
     while (wnd.getKey(GLFW_KEY_ESCAPE) != GLFW_PRESS && wnd.shouldClose() == 0)
     {
         glViewport(0, 0, wnd.getWidth(), wnd.getHeight());
@@ -106,13 +113,13 @@ int main()
             count++;
             glm::dvec2 cursor_pos;
             wnd.getCursorPos(&cursor_pos.x, &cursor_pos.y);
-            glm::ivec2 n = desk_coord_from_screen_coord(cursor_pos);
+            glm::ivec2 n = desk_coord_from_screen_coord((glm::ivec2)cursor_pos);
             if (n.x < desk_size && n.x >= 0 && n.y < desk_size && n.y >= 0)
             {
-                int desk_cell = desk[n.y][n.x];
-                if (desk_cell != Checker::Color::EMPTY) // if it is checker
+                int cell = desk_cell(n);
+                if (cell != Checker::Color::EMPTY && !is_continue) // if it is checker
                 {
-                    if (chekcers[desk_cell].getColor() == whoose_move)
+                    if (checkers[cell].getColor() == whoose_move)
                         checker_clicked = n;
                 }
                 else if (checker_clicked != unclicked) // if it is alreaddy clicked some checker
@@ -122,18 +129,27 @@ int main()
 
         if (checker_clicked != unclicked && cell_clicked != unclicked) // checking if move is correct
         {
-            if (cell_clicked.y - checker_clicked.y == move_direction[whoose_move] && abs(cell_clicked.x - checker_clicked.x) == 1)
-            {
-                std::swap(desk[checker_clicked.y][checker_clicked.x], desk[cell_clicked.y][cell_clicked.x]);
-                checker_clicked = unclicked;
-                cell_clicked = unclicked;
-                whoose_move = next_move[whoose_move];
-            }
-            else if (cell_clicked.y - checker_clicked.y == (move_direction[whoose_move] * 2) &&
-                     abs(cell_clicked.x - checker_clicked.x) == 2 &&
-                     desk[(cell_clicked.y + checker_clicked.y) / 2][(cell_clicked.x + checker_clicked.x) / 2] == next_move[whoose_move])
+            if (abs(cell_clicked.y - checker_clicked.y) == 2 &&
+                abs(cell_clicked.x - checker_clicked.x) == 2 &&
+                get_color(desk[(cell_clicked.y + checker_clicked.y) / 2][(cell_clicked.x + checker_clicked.x) / 2]) == next_move[whoose_move])
             {
                 desk[(cell_clicked.y + checker_clicked.y) / 2][(cell_clicked.x + checker_clicked.x) / 2] = Checker::Color::EMPTY;
+                std::swap(desk[checker_clicked.y][checker_clicked.x], desk[cell_clicked.y][cell_clicked.x]);
+                checker_clicked = cell_clicked;
+                cell_clicked = unclicked;
+                if (has_moves_with_getting(checker_clicked))
+                {
+                    is_continue = true;
+                }
+                else
+                {
+                    checker_clicked = unclicked;
+                    whoose_move = next_move[whoose_move];
+                    is_continue = false;
+                }
+            }
+            else if (cell_clicked.y - checker_clicked.y == move_direction[whoose_move] && abs(cell_clicked.x - checker_clicked.x) == 1)
+            {
                 std::swap(desk[checker_clicked.y][checker_clicked.x], desk[cell_clicked.y][cell_clicked.x]);
                 checker_clicked = unclicked;
                 cell_clicked = unclicked;
@@ -156,7 +172,7 @@ int main()
                 int curren_cell_type = desk[i][j];
                 if (curren_cell_type != Checker::Color::EMPTY)
                 {
-                    Checker &current = chekcers[desk[i][j] % 2];
+                    Checker &current = checkers[curren_cell_type % 2];
                     current.position = position_from_coord(i, j);
                     current.draw();
                 }
@@ -192,7 +208,7 @@ glm::vec2 screen_normalized(glm::vec2 coord)
     return screen_normalized;
 }
 
-glm::ivec2 desk_coord_from_screen_coord(glm::vec2 coord)
+glm::ivec2 desk_coord_from_screen_coord(const glm::ivec2 &coord)
 {
     glm::vec2 normilized = screen_normalized(coord);
     glm::mat2 proj(camera.getProjection());
@@ -200,7 +216,60 @@ glm::ivec2 desk_coord_from_screen_coord(glm::vec2 coord)
     return glm::floor(start_pos);
 }
 
-bool is_cell_black(int x, int y)
+bool is_inside_the_desk(const glm::ivec2 &v)
 {
-    return (x + y) % 2 == 0;
+    return v.x >= 0 && v.x < desk_size && v.y >= 0 && v.y < desk_size;
+}
+
+const glm::ivec2 directions[]{
+    {1, 1},
+    {-1, 1},
+    {1, -1},
+    {-1, -1},
+};
+std::vector<glm::ivec2> get_avialable_moves_with_eating(glm::ivec2 pos)
+{
+    const int directions_count = 4;
+    glm::ivec2 relative_dir[directions_count]{
+        pos + directions[0] * 2,
+        pos + directions[1] * 2,
+        pos + directions[2] * 2,
+        pos + directions[3] * 2,
+    };
+
+    int another_color = next_move[whoose_move];
+    std::vector<glm::ivec2> ret;
+
+    for (int i = 0; i < directions_count; i++)
+    {
+        if (is_inside_the_desk(relative_dir[i]))
+        {
+            if (get_color(desk_cell(relative_dir[i])) == another_color && desk_cell(relative_dir[i] - directions[i]) == Checker::Color::EMPTY)
+                ret.push_back(relative_dir[i]);
+        }
+    }
+
+    return ret;
+}
+bool has_moves_with_getting(const glm::ivec2 &pos, const glm::ivec2 &dir)
+{
+    glm::ivec2 coord = pos + dir * 2;
+    if (is_inside_the_desk(coord))
+    {
+        return desk_cell(coord) == Checker::Color::EMPTY && get_color(desk_cell(coord - dir)) == next_move[whoose_move];
+    }
+    return false;
+}
+
+bool has_moves_with_getting(const glm::ivec2 &pos)
+{
+    return has_moves_with_getting(pos, directions[0]) ||
+           has_moves_with_getting(pos, directions[1]) ||
+           has_moves_with_getting(pos, directions[2]) ||
+           has_moves_with_getting(pos, directions[3]);
+}
+
+int desk_cell(glm::ivec2 v)
+{
+    return desk[v.y][v.x];
 }

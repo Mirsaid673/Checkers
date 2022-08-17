@@ -12,6 +12,10 @@ public:
 		WHITE = 0,
 		BLACK = 1,
 		EMPTY = 2,
+		UNKNOWN = 3,
+		QUEEN_FLAG = 0xA0,
+		WHITE_QUEEN = QUEEN_FLAG + WHITE,
+		BLACK_QUEEN = QUEEN_FLAG + BLACK,
 	};
 
 private:
