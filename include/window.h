@@ -22,7 +22,5 @@ public:
 	operator GLFWwindow *() const { return window; };
 	int getWidth() const { return width; }
 	int getHeight() const { return height; }
-	int getKey(int key) { return glfwGetKey(window, key); };
-	void getCursorPos(double *x, double *y) { glfwGetCursorPos(window, x, y); };
 	int getMouseButton(int button) { return glfwGetMouseButton(window, button); }
 };

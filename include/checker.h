@@ -9,20 +9,18 @@ class Checker
 public:
 	enum Color
 	{
+		QUEEN_FLAG = 0x80,
 		WHITE = 0,
 		BLACK = 1,
 		EMPTY = 2,
-		UNKNOWN = 3,
-		QUEEN_FLAG = 0xA0,
-		WHITE_QUEEN = QUEEN_FLAG + WHITE,
-		BLACK_QUEEN = QUEEN_FLAG + BLACK,
+		WHITE_QUEEN = QUEEN_FLAG | WHITE,
+		BLACK_QUEEN = QUEEN_FLAG | BLACK,
+		UNKNOWN = 8,
 	};
 
 private:
 	Model &model;
-
 	Color color;
-	bool is_queen = false;
 
 public:
 	static const glm::vec2 default_pos;
