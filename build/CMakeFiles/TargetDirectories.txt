@@ -1,3 +1,0 @@
-/home/appl/Projects/checkers/build/CMakeFiles/out.dir
-/home/appl/Projects/checkers/build/CMakeFiles/edit_cache.dir
-/home/appl/Projects/checkers/build/CMakeFiles/rebuild_cache.dir
