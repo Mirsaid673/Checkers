@@ -1,4 +1,5 @@
 #include <iostream>
+#include <algorithm>
 
 #include "window.h"
 #include "mesh2D.h"
@@ -10,15 +11,13 @@
 
 using std::vector, std::pair, std::cout, std::endl, glm::vec2, glm::ivec2;
 
-vec2 position_from_coord(int i, int j) { return vec2(Checker::default_pos + vec2(j, i)); };
+vec2 position_from_coord(int i, int j) { return vec2(Desk::default_checker_pos + vec2(j, i)); };
 ivec2 desk_coord_from_screen_coord(const ivec2 &coord);
-ivec2 get_average_pos(const ivec2 &v1, const ivec2 &v2) { return (v1 + v2) / 2; }
 
 vector<pair<ivec2, ivec2>> get_avialable_moves_with_geting(const ivec2 &pos);
 vector<ivec2> get_avialable_moves_without_geting(const ivec2 &pos);
 
-bool has_moves_with_getting(const ivec2 &, const ivec2 &dir);
-bool has_moves_with_getting(const ivec2 &);
+bool is_game_over_and_get_checker_can_move(int &color, vector<ivec2> &cells);
 
 const int move_direction[2]{
     1,  // for whites
@@ -34,7 +33,7 @@ Window wnd;
 Camera2D camera;
 int main()
 {
-    wnd.init(800, 600, "openGL");
+    wnd.init(800, 800, "openGL");
     Input::init(wnd);
     Shader shader("../resource/shaders/default.vert", "../resource/shaders/default.frag");
     const float camera_scale = 4;
@@ -76,8 +75,8 @@ int main()
     Model available_to_move_cell(checker_mesh, available_to_move_cell_texture, shader);
 
     Model checkers[]{
-        white_model, // white one
-        black_model, // black one
+        white_model,       // white one
+        black_model,       // black one
         white_queen_model, // white queen one
         black_queen_model, // black queen one
     };
@@ -86,6 +85,14 @@ int main()
 
     vector<pair<ivec2, ivec2>> available_moves_with_getting;
     vector<ivec2> available_moves;
+
+    vector<ivec2> checkers_can_move;
+
+    int win_color;
+    if (is_game_over_and_get_checker_can_move(win_color, checkers_can_move))
+    {
+        cout << "game over, won color(0 - white, 1 - black): " << win_color << endl;
+    }
 
     const ivec2 unclicked(8, 8);
     ivec2 checker_clicked(unclicked);
@@ -98,17 +105,13 @@ int main()
         glClearColor(clear_color[0], clear_color[1], clear_color[2], 1.0f);
         glClear(GL_COLOR_BUFFER_BIT);
         //========frame start========
+
         if (Input::getMouseButtonPress(GLFW_MOUSE_BUTTON_LEFT))
         {
-            static int count = 0;
-            cout << "clicked\t" << count << endl;
-            count++;
-            ivec2 cursor_pos = Input::getCursorPos();
-            ivec2 n = desk_coord_from_screen_coord((ivec2)cursor_pos);
+            ivec2 n = desk_coord_from_screen_coord(Input::getCursorPos());
             if (desk.is_inside(n))
             {
-                int cell = desk[n];
-                if (desk.is_checker(cell) && !is_continue) // if it is checker
+                if (desk.is_checker(n) && !is_continue) // if it is checker
                 {
                     if (checker_clicked == n)
                     {
@@ -116,13 +119,17 @@ int main()
                         available_moves.clear();
                         available_moves_with_getting.clear();
                     }
-                    else if (desk.get_checker_color(cell) == desk.get_whoose_move())
+                    else
                     {
-                        checker_clicked = n;
-                        available_moves_with_getting = get_avialable_moves_with_geting(checker_clicked);
-                        available_moves.clear();
-                        if (available_moves_with_getting.size() == 0)
-                            available_moves = get_avialable_moves_without_geting(checker_clicked);
+                        auto begin = checkers_can_move.begin();
+                        auto end = checkers_can_move.end();
+                        if (std::find(begin, end, n) != end || (checkers_can_move.size() == 0 && desk.get_checker_color(n) == desk.get_whoose_move()))
+                        {
+                            checker_clicked = n;
+                            available_moves_with_getting = get_avialable_moves_with_geting(checker_clicked);
+                            if (available_moves_with_getting.size() == 0)
+                                available_moves = get_avialable_moves_without_geting(checker_clicked);
+                        }
                     }
                 }
                 else if (checker_clicked != unclicked) // if it is already clicked some checker
@@ -132,66 +139,66 @@ int main()
 
         if (checker_clicked != unclicked && cell_clicked != unclicked) // checking if move is correct
         {
-            if (available_moves_with_getting.size() == 0)
+            if (available_moves_with_getting.size() != 0)
             {
-                if (available_moves.size() != 0)
+                auto begin = available_moves_with_getting.begin();
+                auto end = available_moves_with_getting.end();
+                auto iter = std::find_if(begin, end, [&](const pair<ivec2, ivec2> &v)
+                                         { return v.first == cell_clicked; });
+                if (iter != end)
                 {
-                    for (const auto &move : available_moves)
-                    {
-                        if (cell_clicked == move)
-                        {
-                            available_moves.clear();
-                            // check if is on the last row to make queen
-                            if (cell_clicked.y == last_row[desk.get_checker_color(checker_clicked)])
-                            {
-                                desk.make_queen(checker_clicked);
-                            }
-                            std::swap(desk[checker_clicked], desk[cell_clicked]);
-                            desk.switch_move();
-                            cell_clicked = unclicked;
-                            checker_clicked = unclicked;
-                            is_continue = false;
-                            break;
-                        }
-                    }
-                }
-                else
-                {
-                    checker_clicked = unclicked;
+                    // check if is on the last row to make queen
+                    if (cell_clicked.y == last_row[desk.get_checker_color(checker_clicked)])
+                        desk.make_queen(checker_clicked);
+
+                    desk[iter->second] = Color::EMPTY;
+                    std::swap(desk[checker_clicked], desk[cell_clicked]);
+                    checker_clicked = cell_clicked;
                     cell_clicked = unclicked;
-                    is_continue = false;
+
+                    available_moves_with_getting = get_avialable_moves_with_geting(checker_clicked);
+                    if (available_moves_with_getting.size() != 0)
+                        is_continue = true;
+                    else
+                    {
+                        checker_clicked = unclicked;
+                        desk.switch_move();
+                        is_continue = false;
+                    }
+
+                    int win_color;
+                    if (is_game_over_and_get_checker_can_move(win_color, checkers_can_move))
+                    {
+                        cout << "game over, won color(0 - white, 1 - black): " << win_color << endl;
+                    }
                 }
             }
             else
             {
-                for (const auto &move : available_moves_with_getting)
+                auto begin = available_moves.begin();
+                auto end = available_moves.end();
+                if (std::find(begin, end, cell_clicked) != end)
                 {
-                    if (cell_clicked == move.first)
+                    available_moves.clear();
+                    // check if is on the last row to make queen
+                    if (cell_clicked.y == last_row[desk.get_checker_color(checker_clicked)])
                     {
-                        available_moves.clear();
-                        available_moves_with_getting.clear();
-
-                        if (cell_clicked.y == last_row[desk.get_checker_color(checker_clicked)])
-                        {
-                            desk.make_queen(checker_clicked);
-                        }
-
-                        desk[move.second] = Checker::EMPTY;
-                        std::swap(desk[checker_clicked], desk[cell_clicked]);
-                        checker_clicked = cell_clicked;
-                        cell_clicked = unclicked;
-
-                        available_moves_with_getting = get_avialable_moves_with_geting(checker_clicked);
-                        if (available_moves_with_getting.size() != 0)
-                            is_continue = true;
-                        else
-                        {
-                            checker_clicked = unclicked;
-                            desk.switch_move();
-                            is_continue = false;
-                        }
-                        break;
+                        desk.make_queen(checker_clicked);
                     }
+                    std::swap(desk[checker_clicked], desk[cell_clicked]);
+                    desk.switch_move();
+                    cell_clicked = unclicked;
+                    checker_clicked = unclicked;
+
+                    int win_color;
+                    if (is_game_over_and_get_checker_can_move(win_color, checkers_can_move))
+                    {
+                        cout << "game over, won color(0 - white, 1 - black): " << win_color << endl;
+                    }
+                }
+                else
+                {
+                    cell_clicked = unclicked;
                 }
             }
         }
@@ -205,11 +212,11 @@ int main()
         {
             for (int j = 0; j < Desk::desk_size; j++) // columns
             {
-                int curren_cell_type = desk[i][j];
-                if (desk.is_checker(curren_cell_type))
+                int curren_cell = desk[i][j];
+                if (desk.is_checker(curren_cell))
                 {
                     vec2 position = position_from_coord(i, j);
-                    checkers[curren_cell_type & 0b11].draw(position);
+                    checkers[curren_cell & 0b11].draw(position);
                 }
             }
         }
@@ -273,8 +280,8 @@ vector<ivec2> get_avialable_moves_without_geting(const ivec2 &pos)
     {
         const int directions_count = 2;
         ivec2 relative_dir[directions_count]{
-            pos + directions[0] * move_direction[desk.get_whoose_move()],
-            pos + directions[1] * move_direction[desk.get_whoose_move()],
+            pos + directions[0] * move_direction[desk.get_checker_color(pos)],
+            pos + directions[1] * move_direction[desk.get_checker_color(pos)],
         };
 
         for (const auto &dir : relative_dir)
@@ -308,6 +315,9 @@ vector<pair<ivec2, ivec2>> get_avialable_moves_with_geting(const ivec2 &pos)
 {
     vector<pair<ivec2, ivec2>> ret;
 
+    int color = desk.get_checker_color(pos);
+    int another_color = desk.get_another_color(pos);
+
     if (!desk.is_queen(pos))
     {
         const int directions_count = 4;
@@ -323,7 +333,7 @@ vector<pair<ivec2, ivec2>> get_avialable_moves_with_geting(const ivec2 &pos)
             if (desk.is_inside(relative_dir[i]))
             {
                 ivec2 t = relative_dir[i] - directions[i];
-                if (desk.is_another_color(t) && desk.is_empty(relative_dir[i]))
+                if (desk.is_checker(t) && desk.get_checker_color(t) == another_color && desk.is_empty(relative_dir[i]))
                     ret.push_back(pair(relative_dir[i], t));
             }
         }
@@ -340,7 +350,7 @@ vector<pair<ivec2, ivec2>> get_avialable_moves_with_geting(const ivec2 &pos)
                     v += dir;
                     continue;
                 }
-                else if (desk.get_checker_color(v) == desk.get_whoose_move())
+                else if (desk.get_checker_color(v) == color)
                     break;
                 else // if is another color
                 {
@@ -364,20 +374,47 @@ vector<pair<ivec2, ivec2>> get_avialable_moves_with_geting(const ivec2 &pos)
     return ret;
 }
 
-bool has_moves_with_getting(const ivec2 &pos, const ivec2 &dir)
+bool is_game_over_and_get_checker_can_move(int &win_color, vector<ivec2> &cells)
 {
-    ivec2 coord = pos + dir * 2;
-    if (desk.is_inside(coord))
+    cells.clear();
+
+    int color = desk.get_whoose_move();
+
+    bool has_color[2]{
+        false, // white
+        false, // black
+    };
+
+    for (int i = 0; i < Desk::desk_size; i++)
     {
-        return desk.is_empty(coord) && desk.is_another_color(coord - dir);
+        for (int j = 0; j < Desk::desk_size; j++)
+        {
+            ivec2 current(j, i);
+            if (desk.is_checker(current))
+            {
+                int current_color = desk.get_checker_color(current);
+
+                auto moves = get_avialable_moves_with_geting(current);
+                if (moves.size() != 0)
+                {
+                    has_color[current_color] = true;
+                    if (current_color == color)
+                        cells.push_back(current);
+                }
+                else
+                {
+                    auto moves2 = get_avialable_moves_without_geting(current);
+                    if (moves2.size() != 0)
+                        has_color[current_color] = true;
+                }
+            }
+        }
+    }
+
+    if (has_color[color] == false)
+    {
+        win_color = desk.get_next_move();
+        return true;
     }
     return false;
-}
-
-bool has_moves_with_getting(const ivec2 &pos)
-{
-    return has_moves_with_getting(pos, directions[0]) ||
-           has_moves_with_getting(pos, directions[1]) ||
-           has_moves_with_getting(pos, directions[2]) ||
-           has_moves_with_getting(pos, directions[3]);
 }
