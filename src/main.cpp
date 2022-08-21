@@ -1,4 +1,5 @@
 #include <iostream>
+#include <list>
 #include <algorithm>
 
 #include "window.h"
@@ -14,10 +15,10 @@ using std::vector, std::pair, std::cout, std::endl, glm::vec2, glm::ivec2;
 vec2 position_from_coord(int i, int j) { return vec2(Desk::default_checker_pos + vec2(j, i)); };
 ivec2 desk_coord_from_screen_coord(const ivec2 &coord);
 
-vector<pair<ivec2, ivec2>> get_avialable_moves_with_geting(const ivec2 &pos);
-vector<ivec2> get_avialable_moves_without_geting(const ivec2 &pos);
+std::list<pair<ivec2, ivec2>> get_avialable_moves_with_geting(const ivec2 &pos);
+std::list<ivec2> get_avialable_moves_without_geting(const ivec2 &pos);
 
-bool is_game_over_and_get_checker_can_move(int &color, vector<ivec2> &cells);
+bool is_game_over_and_get_checker_can_move(int &color, std::list<ivec2> &cells);
 
 const int move_direction[2]{
     1,  // for whites
@@ -83,10 +84,10 @@ int main()
 
     float clear_color[3]{1.0f, 0.5f, 0.75f};
 
-    vector<pair<ivec2, ivec2>> available_moves_with_getting;
-    vector<ivec2> available_moves;
+    std::list<pair<ivec2, ivec2>> available_moves_with_getting;
+    std::list<ivec2> available_moves;
 
-    vector<ivec2> checkers_can_move;
+    std::list<ivec2> checkers_can_move;
 
     int win_color;
     if (is_game_over_and_get_checker_can_move(win_color, checkers_can_move))
@@ -272,9 +273,9 @@ const ivec2 directions[]{
     Desk::LEFT_BOTTOM,
 };
 
-vector<ivec2> get_avialable_moves_without_geting(const ivec2 &pos)
+std::list<ivec2> get_avialable_moves_without_geting(const ivec2 &pos)
 {
-    vector<ivec2> ret;
+    std::list<ivec2> ret;
 
     if (!desk.is_queen(pos))
     {
@@ -311,9 +312,9 @@ vector<ivec2> get_avialable_moves_without_geting(const ivec2 &pos)
     return ret;
 }
 
-vector<pair<ivec2, ivec2>> get_avialable_moves_with_geting(const ivec2 &pos)
+std::list<pair<ivec2, ivec2>> get_avialable_moves_with_geting(const ivec2 &pos)
 {
-    vector<pair<ivec2, ivec2>> ret;
+    std::list<pair<ivec2, ivec2>> ret;
 
     int color = desk.get_checker_color(pos);
     int another_color = desk.get_another_color(pos);
@@ -374,7 +375,7 @@ vector<pair<ivec2, ivec2>> get_avialable_moves_with_geting(const ivec2 &pos)
     return ret;
 }
 
-bool is_game_over_and_get_checker_can_move(int &win_color, vector<ivec2> &cells)
+bool is_game_over_and_get_checker_can_move(int &win_color, std::list<ivec2> &cells)
 {
     cells.clear();
 
